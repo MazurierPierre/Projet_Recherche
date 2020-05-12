@@ -1,3 +1,4 @@
+import numpy as np
 import audio_manager as audio
 import matplotlib.pyplot as plt
 import librosa.display
@@ -6,10 +7,13 @@ import librosa.display
 signal, sample_rate = audio.retrieve_audio('in.wav')
 
 # Apply Filtering
-processed_signal = audio.process(signal)
+processed_signal = audio.process(signal, sample_rate)
+
+# Save processed Signal (OPTIONAL)
+audio.save_signal('out.wav', processed_signal, sample_rate)
 
 # Chop in frames
-frames = audio.chop_in_frames(processed_signal, 60)
+frames = audio.chop_in_frames(processed_signal, 3)
 
 # Extract Features
 features = []
