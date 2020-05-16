@@ -1,6 +1,6 @@
 import numpy as np
 import librosa
-from scipy.signal import butter, sosfilt
+from scipy.signal import butter, sosfilt, correlate
 from scipy.io import wavfile
 
 
@@ -11,9 +11,18 @@ def butter_bandpass(lowcut, highcut, sample_frequency, order=5):
     return butter(order, [low, high], analog=False, btype='band', output='sos')
 
 
-def process(signal, sample_frequency, order=5):
-    sos = butter_bandpass(500, 1200, sample_frequency, order)
-    return sosfilt(sos, signal)
+def process(signal, bands, sample_frequency=44100, order=3, band_width=50):
+    signals = []
+    for i in range(0, len(bands)):
+        sos = butter_bandpass(bands[i] - band_width, bands[i] + band_width, sample_frequency, order)
+        signals.append(sosfilt(sos, signal))
+
+    cor = signals[0]
+
+    for i in range(1, len(signals)):
+        cor += signals[i]
+
+    return cor
 
 
 def save_signal(output_file_path, signal, samplerate=44100):
