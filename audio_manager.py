@@ -12,18 +12,25 @@ def butter_bandpass(lowcut, highcut, sample_frequency, order=5):
     return butter(order, [low, high], analog=False, btype='band', output='sos')
 
 
-def process(signal, bands, sample_frequency=44100, order=3, band_width=50):
+def process(signal, bands, sample_frequency=44100):
     signals = []
-    for i in range(0, len(bands)):
-        sos = butter_bandpass(bands[i] - band_width, bands[i] + band_width, sample_frequency, order)
+
+    for band in bands:
+        print("Found band :", band.frequency, band.bandwidth, band.order)
+        sos = butter_bandpass(
+            band.frequency - band.bandwidth,
+            band.frequency + band.bandwidth,
+            sample_frequency,
+            order=band.order
+        )
         signals.append(sosfilt(sos, signal))
 
-    cor = signals[0]
+    processed_signal = signals[0]
 
     for i in range(1, len(signals)):
-        cor += signals[i]
+        processed_signal += signals[i]
 
-    return cor
+    return processed_signal
 
 
 def save_signal(output_file_path, signal, samplerate=44100):
@@ -68,10 +75,13 @@ def retrieve_audio(input_file_path=''):
 
 def chop_in_frames(signal, frame_size):
 
+    added_samples = 0
+
     while len(signal) % frame_size != 0:
         signal = np.append(signal, 0)
+        added_samples = added_samples + 1
 
-    return np.split(signal, len(signal) / frame_size)
+    return np.split(signal, len(signal) / frame_size), added_samples
 
 
 def extract_features(sample_rate, signal):
