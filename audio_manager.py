@@ -16,7 +16,6 @@ def process(signal, bands, sample_frequency=44100):
     signals = []
 
     for band in bands:
-        print("Found band :", band.frequency, band.bandwidth, band.order)
         sos = butter_bandpass(
             band.frequency - band.bandwidth,
             band.frequency + band.bandwidth,
@@ -38,13 +37,13 @@ def save_signal(output_file_path, signal, samplerate=44100):
     wavfile.write(output_file_path, samplerate, conv_signal)
 
 
-def get_from_file(input_file_path):
-    return librosa.load(input_file_path, sr=None)
+def get_from_file(input_file_path, sample_rate=None):
+    return librosa.load(input_file_path, sr=sample_rate)
 
 
-def get_from_mic(buffer_size=1024, samplerate=44100):
+def get_from_mic(sample_rate, buffer_size=1024):
     try:
-        sd.default.samplerate = samplerate
+        sd.default.samplerate = sample_rate
         sd.default.dtype = np.float32
         sd.default.channels = 1
         sd.default.blocksize = buffer_size
@@ -66,15 +65,14 @@ def get_from_mic(buffer_size=1024, samplerate=44100):
         print(e)
 
 
-def retrieve_audio(input_file_path=''):
+def retrieve_audio(input_file_path='', sample_rate=8000):
     if input_file_path == '':
-        return get_from_mic()
+        return get_from_mic(sample_rate)
     else:
-        return get_from_file(input_file_path)
+        return get_from_file(input_file_path, sample_rate)
 
 
 def chop_in_frames(signal, frame_size):
-
     added_samples = 0
 
     while len(signal) % frame_size != 0:
