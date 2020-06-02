@@ -33,7 +33,8 @@ def process(signal, bands, sample_frequency=44100):
 
 
 def save_signal(output_file_path, signal, samplerate=44100):
-    conv_signal = signal.astype(np.float32)
+    temp_signal = signal * 32767
+    conv_signal = temp_signal.astype(np.int16)
     wavfile.write(output_file_path, samplerate, conv_signal)
 
 
